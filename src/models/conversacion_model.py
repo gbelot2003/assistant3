@@ -1,7 +1,7 @@
 from extensions import db
 
-class Conversacion(db.Model):
-    __tablename__ = 'conversaciones'
+class Conversation(db.Model):
+    __tablename__ = 'conversations'
 
     id = db.Column(db.Integer, primary_key=True)
     user_message = db.Column(db.Text, nullable=False)
