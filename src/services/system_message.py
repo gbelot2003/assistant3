@@ -1,12 +1,9 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from src.extractors.name_extractor import NombreExtractor
 from src.actions.name_action import NameAction
 from src.actions.verify_contact_action import VerifyContactAction
-from src.services.user_info_service import UserInfoService
 from src.repos.conversaciones_repo import ConversacionRepo
-from src.repos.contact_repo import ContactRepo
 
 
 load_dotenv(override=True)
@@ -24,8 +21,11 @@ class SystemMessage:
         contacto = VerifyContactAction().verificar_contacto(user_id)
 
         # Procesar el nombre del contacto
-        name_action = NameAction(contacto, messages)
-        messages = name_action.process_name()
+        name_action = NameAction(contacto, prompt)
+        name_message = name_action.process_name()
+        if name_message:
+            messages.append(name_message)
+
 
         # Agregar el mensaje actual del usuario
         messages.append({"role": "user", "content": prompt})

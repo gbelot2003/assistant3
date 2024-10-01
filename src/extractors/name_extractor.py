@@ -1,6 +1,7 @@
 # src/extractors/name_extractor.py
 
 import re
+import logging
 
 class NombreExtractor:
     def __init__(self):
@@ -37,5 +38,6 @@ class NombreExtractor:
         for patron in self.patrones_nombre:
             resultado = re.findall(patron, texto)
             if resultado:
+                logging.debug("patron no encontrado...")
                 return resultado[0].capitalize()  # Retorna el primer nombre encontrado y lo capitaliza
         return None  # Si no encuentra un nombre, retorna None
