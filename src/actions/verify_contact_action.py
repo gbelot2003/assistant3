@@ -15,13 +15,5 @@ class VerifyContactAction:
         if not contacto:
             # Si no existe, crear un nuevo contacto con el número de teléfono
             contacto = ContactRepo.crear_contacto(telefono=user_id)
-            print(f"Nuevo contacto creado: {contacto.telefono}")
-        else:
-            # Si existe, extraer la información del contacto
-            nombre = contacto.nombre
-            direccion = contacto.direccion
-            email = contacto.email
-            telefono = contacto.telefono
-            print(f"Contacto existente: {nombre}, {direccion}, {email}, {telefono}")
 
         return contacto

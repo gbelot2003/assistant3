@@ -1,19 +1,24 @@
 # src/actions/name_action.py
 
+# src/actions/name_action.py
 from src.extractors.name_extractor import NombreExtractor
+from src.repos.contact_repo import ContactRepo
 
 class NameAction:
+    def __init__(self, contacto, messages):
+        self.contacto = contacto
+        self.messages = messages
 
-    def __init__(self, user_info_service):
-        self.extractor = NombreExtractor()
-        self.user_info_service = user_info_service
-
-
-    def extraer_nombre(self, texto):
-        # Intentamos extraer el nombre del texto
-        nombre_detectado = self.nombre_extractor.extraer_nombre(texto)
-        
-        if nombre_detectado:
-            self.user_info_service.set_nombre(nombre_detectado)
-            return nombre_detectado
-        return None
+    def process_name(self):
+        messages = []
+        # Si el contacto tiene un nombre, usarlo en la conversación
+        if self.contacto.nombre:
+            messages.append({"role": "assistant", "content": f"El usuario se llama y llamalo {self.contacto.nombre}."})
+            return messages
+        else:
+            extraerNombre = NombreExtractor().extraer_nombre(self.contacto.prompt)
+            # grabar nombre en base de datos
+            if extraerNombre:
+                ContactRepo().actualizar_contacto(self.contacto.id, nombre=extraerNombre)
+                messages.append({"role": "system", "content": f"El usuario se llama y llamalo {extraerNombre}."})
+                return messages
