@@ -10,8 +10,8 @@ def configure_twilio_routes(app):
             message_body = request.form.get('Body')
             from_number = request.form.get('From')
 
-            if not message_body or not from_number:
-                return jsonify({"error": "Missing required parameters"}), 400
+            #if not message_body or not from_number:
+            #    return jsonify({"error": "Missing required parameters"}), 400
 
             response = OpenAIService().handle_request(message_body, from_number)
 

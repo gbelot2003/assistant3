@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+from src.actions.verify_contact_action import VerifyContactAction
 from src.repos.conversaciones_repo import ConversacionRepo
 
 load_dotenv(override=True)
@@ -9,10 +10,13 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 class SystemMessage:
 
     def handle_request(self, prompt, user_id):
-        print(f"Usuario: {prompt}")
+        print(f"system: {prompt}")
 
         # Definir el prompt del usuario
         messages = []
+
+        # Verificar si el usuario tiene un número de teléfono en la base de datos
+        #contacto = VerifyContactAction().verificar_contacto(user_id)
 
         # Agregar el mensaje actual del usuario
         messages.append({"role": "user", "content": prompt})
@@ -26,9 +30,7 @@ class SystemMessage:
         # Obtener la respuesta generada por el modelo
         respuesta_modelo = response.choices[0].message.content.strip()  # type: ignore
 
-        # Imprimir la respuesta generada por el modelo
-        print(f"GPT: {respuesta_modelo}")
-
+    
         # Guardar la conversión del modelo en la base de datos
         ConversacionRepo().crear_conversacion(prompt, respuesta_modelo, user_id)
 
