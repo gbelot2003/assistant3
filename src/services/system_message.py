@@ -1,13 +1,14 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+from src.repos.conversaciones_repo import ConversacionRepo
 
 load_dotenv(override=True)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class SystemMessage:
 
-    def handle_request(self, prompt):
+    def handle_request(self, prompt, user_id):
         print(f"Usuario: {prompt}")
 
         # Definir el prompt del usuario
@@ -27,5 +28,8 @@ class SystemMessage:
 
         # Imprimir la respuesta generada por el modelo
         print(f"GPT: {respuesta_modelo}")
+
+        # Guardar la conversión del modelo en la base de datos
+        ConversacionRepo().crear_conversacion(prompt, respuesta_modelo, user_id)
 
         return respuesta_modelo
