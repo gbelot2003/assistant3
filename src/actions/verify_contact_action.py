@@ -21,6 +21,7 @@ class VerifyContactAction:
             nombre = contacto.nombre
             direccion = contacto.direccion
             email = contacto.email
-            print(f"Contacto encontrado: {nombre}, {direccion}, {email}")
+            telefono = contacto.telefono
+            print(f"Contacto existente: {nombre}, {direccion}, {email}, {telefono}")
 
         return contacto
