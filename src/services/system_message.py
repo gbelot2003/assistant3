@@ -16,7 +16,7 @@ class SystemMessage:
         messages = []
 
         # Verificar si el usuario tiene un número de teléfono en la base de datos
-        #contacto = VerifyContactAction().verificar_contacto(user_id)
+        VerifyContactAction().verificar_contacto(user_id)
 
         # Agregar el mensaje actual del usuario
         messages.append({"role": "user", "content": prompt})

@@ -3,9 +3,10 @@
 from src.repos.contact_repo import ContactRepo
 
 class VerifyContactAction:
-    def __init__(self, contact_repo):
-        self.contact_repo = contact_repo
+    def __init__(self):
+        pass
 
+    @staticmethod
     def verificar_contacto(user_id):
         print("Verificando contacto...")
         # Verificar si el usuario tiene un número de teléfono en la base de datos
