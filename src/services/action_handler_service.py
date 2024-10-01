@@ -1,4 +1,5 @@
 from src.actions.verify_contact_action import VerifyContactAction
+from src.repos.chromadb_repo import ChromaDBRepo
 from src.actions.name_action import NameAction
 
 class ActionHandleService:
@@ -16,5 +17,12 @@ class ActionHandleService:
         name_message = name_action.process_name()
         if name_message:
             self.messages.append(name_message)
+
+        # Buscar fragmentos relevantes en ChromaDB
+        chromadb_repo = ChromaDBRepo()
+        relevant_chunks = chromadb_repo.buscar_fragmentos_relevantes(self.prompt)
+        if relevant_chunks:
+            self.messages.append(relevant_chunks)
+
 
         return self.messages
