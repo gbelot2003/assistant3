@@ -1,0 +1,7 @@
+Flask
+Flask-SocketIO
+Flask-SQLAlchemy
+PyMuPDF
+SQLAlchemy
+chromadb
+Flask-Migrate

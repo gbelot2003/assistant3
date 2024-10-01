@@ -1,3 +1,5 @@
+# app.py
+
 from flask import Flask, render_template, request, jsonify
 from src.routes.router import configure_routes
 app = Flask(__name__)
