@@ -1,10 +1,8 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-from src.actions.name_action import NameAction
-from src.actions.verify_contact_action import VerifyContactAction
 from src.repos.conversaciones_repo import ConversacionRepo
-
+from src.services.action_handler_service import ActionHandleService
 
 load_dotenv(override=True)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -17,14 +15,9 @@ class SystemMessage:
         # Definir el prompt del usuario
         messages = []
 
-        # Verificar si el usuario tiene un número de teléfono en la base de datos
-        contacto = VerifyContactAction().verificar_contacto(user_id)
-
-        # Procesar el nombre del contacto
-        name_action = NameAction(contacto, prompt)
-        name_message = name_action.process_name()
-        if name_message:
-            messages.append(name_message)
+        # Crear una instancia de ActionHandleService
+        action_handle_service = ActionHandleService(user_id, prompt)
+        messages = action_handle_service.handle_actions()
 
 
         # Agregar el mensaje actual del usuario
