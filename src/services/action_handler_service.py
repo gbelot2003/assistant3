@@ -1,3 +1,4 @@
+from src.actions.conversation_history_action import ConversationHistoryAction
 from src.actions.verify_contact_action import VerifyContactAction
 from src.repos.chromadb_repo import ChromaDBRepo
 from src.actions.name_action import NameAction
@@ -24,5 +25,9 @@ class ActionHandleService:
         if relevant_chunks:
             self.messages.append(relevant_chunks)
 
+        # Buscar historial de conversación
+        conversation_history_action = ConversationHistoryAction()
+        chat_history_messages = conversation_history_action.compilar_conversacion(self.user_id)
+        self.messages.extend(chat_history_messages)
 
         return self.messages
