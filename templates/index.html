@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,18 +11,45 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_head %}{% endblock %}
     <style>
-        /* Ajustes generales para la plantilla en pantallas pequeñas */
+        /* Ajustes generales de la plantilla */
         .whatsapp-header {
             font-size: 14px;
         }
 
         .chat-container {
             max-height: 60vh; /* Limitar la altura en dispositivos móviles */
+            overflow-y: auto;
+        }
+
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Espacio entre mensajes */
+            padding: 10px 15px;
         }
 
         .message {
-            font-size: 14px;
             word-wrap: break-word;
+            padding: 10px 15px;
+            border-radius: 15px;
+            display: inline-block;
+            max-width: 70%;
+            position: relative;
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #dcf8c6; /* Verde claro */
+            color: #000;
+            border-top-right-radius: 0;
+        }
+
+        .other-message {
+            align-self: flex-start;
+            background-color: #ffffff; /* Blanco */
+            color: #000;
+            border-top-left-radius: 0;
         }
 
         /* Ajustes específicos para dispositivos móviles */
@@ -43,12 +71,13 @@
                 height: 36px;
             }
 
-            .container-fluid, .row, .col-md-6 {
+            .container-fluid,
+            .row,
+            .col-md-6 {
                 padding: 0;
                 margin: 0;
             }
 
-            /* Ajustes para el contenedor principal del chat */
             .row {
                 justify-content: center;
             }
@@ -59,30 +88,21 @@
             }
         }
 
-        /* Estilo de burbujas de chat */
-        .message.user-bubble {
-            background-color: #dcf8c6;
-            color: #000;
-            max-width: 70%;
-        }
-
-        .message.other-bubble {
-            background-color: #fff;
-            color: #000;
-            max-width: 70%;
-        }
-
         .message-time {
             font-size: 10px;
             display: block;
+            margin-top: 5px;
+            text-align: right;
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark z-index-1" style="background-color: purple">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">Chat App</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -95,15 +115,19 @@
         </div>
     </nav>
 
-    <div class="container-fluid py-3 d-flex justify-content-center align-items-center" style="height: 100vh; background-color: #ece5dd;">
+    <div class="container-fluid py-3 d-flex justify-content-center align-items-center"
+        style="height: 100vh; background-color: #ece5dd;">
         <div class="row justify-content-center w-100">
             <!-- Contenedor de WhatsApp optimizado para dispositivos móviles -->
-            <div class="p-0 whatsapp-container" style="border: 1px solid #ddd; border-radius: 10px; background-color: #f0f0f0; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 100%;">
+            <div class="p-0 whatsapp-container"
+                style="border: 1px solid #ddd; border-radius: 10px; background-color: #f0f0f0; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 100%;">
 
                 <!-- Barra superior de WhatsApp -->
-                <div class="whatsapp-header bg-success text-white p-2 d-flex justify-content-between align-items-center">
+                <div
+                    class="whatsapp-header bg-success text-white p-2 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <img src="https://www.w3schools.com/w3images/avatar2.png" class="rounded-circle" width="30px" alt="avatar">
+                        <img src="https://www.w3schools.com/w3images/avatar2.png" class="rounded-circle" width="30px"
+                            alt="avatar">
                         <span class="ms-2 fw-bold">Asistente Virtual Encomiendas Express</span>
                     </div>
                     <div>
@@ -113,14 +137,16 @@
                 </div>
 
                 <!-- Contenedor del chat -->
-                <div class="chat-container" id="log" style="height: 500px; overflow-y: scroll; background-image: url('https://i.imgur.com/jF1kIwm.png'); background-size: cover; padding: 10px;">
+                <div class="chat-container" id="log"
+                    style="height: 500px; overflow-y: scroll; opacity: 0.5; background-image: url('http://127.0.0.1:5000/static/background.jpg'); background-size: cover; padding: 10px;">
                     <!-- Log de mensajes se llenará dinámicamente aquí -->
-                    <div id="response-log"></div>
+                    <div id="response-log" class="message-container"></div>
                 </div>
 
                 <!-- Barra inferior con campos de texto y botones -->
                 <div class="whatsapp-footer bg-light p-2 d-flex align-items-center">
-                    <input type="text" id="message" name="message" class="form-control rounded-pill me-2" placeholder="Escribe un mensaje..." style="flex: 1;">
+                    <input type="text" id="message" name="message" class="form-control rounded-pill me-2"
+                        placeholder="Escribe un mensaje..." style="flex: 1;">
                     <button type="submit" id="send-btn" class="btn btn-success rounded-circle">
                         <i class="bi bi-send-fill" style="font-size: 16px;"></i>
                     </button>
@@ -131,11 +157,15 @@
                     <div class="row">
                         <div class="col-12 mb-2">
                             <label for="url" class="form-label fw-bold">URL del API:</label>
-                            <input type="text" id="url" name="url" class="form-control" value="http://127.0.0.1:5000/api/twilio" placeholder="http://example.com/endpoint" required>
+                            <input type="text" id="url" name="url" class="form-control"
+                                value="http://127.0.0.1:5000/api/twilio" placeholder="http://example.com/endpoint"
+                                required>
                         </div>
                         <div class="col-12 mb-2">
-                            <label for="from_number" class="form-label fw-bold">Número de Teléfono Simulado (From):</label>
-                            <input type="text" id="from_number" name="from_number" class="form-control" placeholder="+14155551234" value="+14155551234">
+                            <label for="from_number" class="form-label fw-bold">Número de Teléfono Simulado
+                                (From):</label>
+                            <input type="text" id="from_number" name="from_number" class="form-control"
+                                placeholder="+14155551234" value="+14155551234">
                         </div>
                     </div>
                 </div>
@@ -143,6 +173,63 @@
         </div>
     </div>
 
-    {% block extra_scripts %}{% endblock %}
+    {% block extra_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Al hacer clic en el botón enviar en el chat
+        document.getElementById('send-btn').addEventListener('click', function (event) {
+            event.preventDefault();
+            sendMessage();
+        });
+
+        // Enviar mensaje con la tecla Enter en el chat
+        document.getElementById('message').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Función para enviar el mensaje en el chat
+        function sendMessage() {
+            const url = document.getElementById('url').value;
+            const message = document.getElementById('message').value;
+            const from_number = document.getElementById('from_number').value;
+
+            if (message) {
+                axios.post('/api/send_message', { url, message, from_number })
+                    .then(response => {
+                        const responseMessage = response.data.response.message;
+                        addMessageToChat(responseMessage, 'other');  // Añadir la respuesta del servidor al chat
+                    })
+                    .catch(error => {
+                        console.error('Error al enviar el mensaje:', error);
+                    });
+
+                addMessageToChat(message, 'user');  // Añadir el mensaje del usuario al chat
+                document.getElementById('message').value = '';  // Limpiar el campo
+            }
+        }
+
+        // Función para añadir un mensaje al chat
+        function addMessageToChat(message, sender) {
+            let logDiv = document.getElementById('response-log');
+
+            // Crear contenedor del mensaje
+            let messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'other-message');
+
+            // Crear el contenido HTML del mensaje
+            messageElement.innerHTML = `
+                <span>${message}</span>
+                <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            `;
+
+            logDiv.appendChild(messageElement);
+            logDiv.scrollTop = logDiv.scrollHeight;  // Scroll automático
+        }
+    </script>
+    {% endblock %}
 </body>
+
 </html>
