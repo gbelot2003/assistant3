@@ -1,20 +1,14 @@
-# src/routes/routes.py
+# src/routes/api.py
 
 import os
 import requests
-from flask import render_template, jsonify, request
-from src.services.openai_service import OpenAIService
 from dotenv import load_dotenv
+from flask import  jsonify, request
 
 load_dotenv(override=True)
 
-def configure_routes(app):
-    
-    # Ruta para el home
-    @app.route("/")
-    def index():
-        return render_template("index.html")
-    
+def configure_api_routes(app):
+
     @app.route('/api/send_message', methods=['POST'])
     def send_message():
         data = request.json
@@ -48,17 +42,3 @@ def configure_routes(app):
             return jsonify({"status": "success", "response": response_data})
         except Exception as e:
             return jsonify({"status": "error", "response": str(e)})
-
-
-    # Ruta para el webhook
-    @app.route('/api/twilio', methods=['POST'])
-    def twilio_webhook():
-        
-        # Obtener datos desde mensajes de API
-        message_body = request.form.get('Body')
-        from_number = request.form.get('From')
-
-        response = OpenAIService().handle_request(message_body)
-
-         # Devolver la respuesta a Twilio
-        return jsonify({"message": response})

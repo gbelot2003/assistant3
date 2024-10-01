@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from src.routes.routes import configure_routes
-
+from src.routes.router import configure_routes
 app = Flask(__name__)
 
 
