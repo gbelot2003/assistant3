@@ -14,11 +14,10 @@ class NameAction:
         if self.contacto.nombre:
             message = {"role": "assistant", "content": f"El usuario se llama y llamalo {self.contacto.nombre}."}
         else:
-            logging.debug("Nombre no encontrado, intentando extraer...")
             extraerNombre = NombreExtractor().extraer_nombre(self.prompt)            # grabar nombre en base de datos
             if extraerNombre:
                 ContactRepo().actualizar_contacto(self.contacto.id, nombre=extraerNombre)
                 message = {"role": "assistant", "content": f"El usuario se llama y llamalo {extraerNombre}."}
             else:
-                message = {"role": "assistant", "content": f"El usuario se llama y llamalo {self.contacto.telefono}."}
+                message = {"role": "system", "content": "pregunte al usuario en que le podemos ayudar y cual es su nombre para mejor servicio."}
         return message

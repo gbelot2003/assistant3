@@ -1,6 +1,8 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+from src.actions.name_action import NameAction
+from src.actions.verify_contact_action import VerifyContactAction
 from src.repos.conversaciones_repo import ConversacionRepo
 from src.services.action_handler_service import ActionHandleService
 
@@ -26,12 +28,11 @@ class SystemMessage:
 
         # Enviar los mensajes a la API de OpenAI
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo", messages=messages, max_tokens=150, temperature=0.1  # type: ignore
+            model="gpt-3.5-turbo", messages=messages, max_tokens=550, temperature=0.2  # type: ignore
         )
         
         # Obtener la respuesta generada por el modelo
         respuesta_modelo = response.choices[0].message.content.strip()  # type: ignore
-
     
         # Guardar la conversión del modelo en la base de datos
         ConversacionRepo().crear_conversacion(prompt, respuesta_modelo, user_id)
