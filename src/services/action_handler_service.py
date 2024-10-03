@@ -1,3 +1,5 @@
+from src.actions.address_action import AddressAction
+from src.actions.email_action import EmailAction
 from src.actions.conversation_history_action import ConversationHistoryAction
 from src.actions.verify_contact_action import VerifyContactAction
 from src.repos.chromadb_repo import ChromaDBRepo
@@ -29,6 +31,18 @@ class ActionHandleService:
         name_message = name_action.process_name()
         if name_message:
             self.messages.append(name_message)
+
+        # Procesar la dirección del contacto
+        address_action = AddressAction(contacto, self.prompt)
+        address_message = address_action.process_address()
+        if address_message:
+            self.messages.append(address_message)
+
+        # Procesar el email del contacto
+        email_action = EmailAction(contacto, self.prompt)
+        email_message = email_action.process_email()
+        if email_message:
+            self.messages.append(email_message)
 
 
         return self.messages
