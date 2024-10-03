@@ -6,12 +6,23 @@ from src.actions.address_action import AddressAction
 from src.actions.email_action import EmailAction
 from src.actions.schedule_delivery_action import ScheduleDeliveryAction
 from src.services.intent_service import IntentService
+from geopy.geocoders import Nominatim
+from config import Config
 
 class ActionHandleService:
     def __init__(self, user_id, prompt):
         self.user_id = user_id
         self.prompt = prompt
         self.messages = []
+        self.context = {
+            "package_type": None,
+            "delivery_time": None,
+            "address": None,
+            "email": None,
+            "phone": None,
+        }
+        self.geolocator = Nominatim(user_agent="delivery_scheduler")
+        self.box_types = Config.BOX_TYPES
 
     def handle_actions(self):
         # Verificar si el usuario tiene un número de teléfono en la base de datos
@@ -48,30 +59,60 @@ class ActionHandleService:
 
         # Detectar intent
         intent_service = IntentService(self.prompt)
-        intent = intent_service.detect_intent()
+        intent, data = intent_service.detect_intent()
 
         if intent == "schedule_delivery":
-            # Recopilar información necesaria para agendar la entrega
-            package_type = self.extract_package_type(self.prompt)
-            delivery_time = self.extract_delivery_time(self.prompt)
+            self.messages.append({"role": "system", "content": "Por favor, proporciona el tipo de caja, la hora de entrega, la dirección, el email y el teléfono."})
+        elif intent == "provide_package_type":
+            package_type = data[0].lower()
+            if package_type in self.box_types:
+                self.context["package_type"] = self.box_types[package_type]
+                self.messages.append({"role": "system", "content": f"Tipo de caja registrado: {self.context['package_type']}"})
+            else:
+                self.messages.append({"role": "system", "content": "Tipo de caja no válido. Por favor, selecciona uno de los siguientes tipos: small, medium, large, extra_large, extra_extra_large."})
+        elif intent == "provide_delivery_time":
+            self.context["delivery_time"] = data[0]
+            self.messages.append({"role": "system", "content": f"Hora de entrega registrada: {data[0]}"})
+        elif intent == "provide_address":
+            self.context["address"] = data[0]
+            self.messages.append({"role": "system", "content": f"Dirección registrada: {data[0]}"})
+        elif intent == "provide_email":
+            self.context["email"] = data[0]
+            self.messages.append({"role": "system", "content": f"Email registrado: {data[0]}"})
+        elif intent == "provide_phone":
+            self.context["phone"] = data[0]
+            self.messages.append({"role": "system", "content": f"Teléfono registrado: {data[0]}"})
 
-            if package_type and delivery_time:
+        # Verificar si se tiene toda la información necesaria para agendar la entrega
+        if all(self.context.values()):
+            # Obtener las coordenadas de la dirección del cliente
+            customer_coords = self.get_coordinates_from_address(self.context["address"])
+            if not customer_coords:
+                self.messages.append({"role": "system", "content": "No se pudo obtener las coordenadas de la dirección."})
+            else:
                 # Agendar la entrega
-                schedule_delivery_action = ScheduleDeliveryAction(self.user_id, package_type, delivery_time, contacto.direccion)
+                schedule_delivery_action = ScheduleDeliveryAction(
+                    self.user_id,
+                    self.context["package_type"],
+                    self.context["delivery_time"],
+                    self.context["address"]
+                )
                 delivery_message = schedule_delivery_action.schedule_delivery()
                 if delivery_message:
                     self.messages.append(delivery_message)
-            else:
-                self.messages.append({"role": "system", "content": "Por favor, proporciona el tipo de caja y la hora de entrega."})
+        else:
+            # Verificar si el contacto ya tiene un número de teléfono registrado
+            if not contacto.telefono:
+                self.messages.append({"role": "system", "content": "Por favor, proporciona tu número de teléfono."})
 
         return self.messages
 
-    def extract_package_type(self, prompt):
-        # Implementa aquí la lógica para extraer el tipo de caja del prompt
-        # Por simplicidad, asumimos que el tipo de caja está en el texto
-        return "tipo_de_caja" if "tipo_de_caja" in prompt else None
-
-    def extract_delivery_time(self, prompt):
-        # Implementa aquí la lógica para extraer la hora de entrega del prompt
-        # Por simplicidad, asumimos que la hora de entrega está en el texto
-        return "2023-10-01 18:00:00" if "hora de entrega" in prompt else None
+    def get_coordinates_from_address(self, address):
+        try:
+            location = self.geolocator.geocode(address)
+            if location:
+                return (location.latitude, location.longitude)
+            return None
+        except Exception as e:
+            print(f"Error obteniendo coordenadas: {e}")
+            return None

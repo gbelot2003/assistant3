@@ -1,6 +1,7 @@
 from src.repos.package_repo import PackageRepo
 from src.repos.delivery_repo import DeliveryRepo
 from src.repos.contact_repo import ContactRepo
+from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 
 class ScheduleDeliveryAction:
@@ -9,6 +10,7 @@ class ScheduleDeliveryAction:
         self.package_type = package_type
         self.delivery_time = delivery_time
         self.address = address
+        self.geolocator = Nominatim(user_agent="delivery_scheduler")
 
     def schedule_delivery(self):
         # Verificar si el usuario existe
@@ -19,22 +21,22 @@ class ScheduleDeliveryAction:
         # Crear el paquete
         package = PackageRepo.create_package(self.package_type, contact.id)
 
+        # Obtener las coordenadas de la dirección del cliente
+        customer_coords = self.get_coordinates_from_address(self.address)
+        if not customer_coords:
+            return {"error": "No se pudo obtener las coordenadas de la dirección"}
+
         # Calcular el cargo extra por distancia
-        extra_charge = self.calculate_extra_charge(self.address)
+        extra_charge = self.calculate_extra_charge(customer_coords)
 
         # Crear la entrega
         delivery = DeliveryRepo.create_delivery(package.id, self.delivery_time, extra_charge)
 
         return {"message": "Entrega agendada exitosamente", "delivery_id": delivery.id}
 
-    def calculate_extra_charge(self, address):
+    def calculate_extra_charge(self, customer_coords):
         # Coordenadas de San Antonio, Texas
         san_antonio_coords = (29.4241219, -98.4936282)
-
-        # Obtener las coordenadas de la dirección del cliente
-        # Aquí deberías usar un servicio de geocodificación para obtener las coordenadas de la dirección
-        # Por simplicidad, asumimos que ya tienes las coordenadas
-        customer_coords = self.get_coordinates_from_address(address)
 
         # Calcular la distancia entre San Antonio y la dirección del cliente
         distance = geodesic(san_antonio_coords, customer_coords).miles
@@ -48,7 +50,11 @@ class ScheduleDeliveryAction:
             return (90 - 30) * 1  # Máximo cargo para distancias mayores a 90 millas
 
     def get_coordinates_from_address(self, address):
-        # Implementa aquí la lógica para obtener las coordenadas de la dirección
-        # Puedes usar un servicio de geocodificación como Google Maps API o OpenStreetMap
-        # Por simplicidad, aquí se asume que ya tienes las coordenadas
-        return (29.4241219, -98.4936282)  # Coordenadas de ejemplo
+        try:
+            location = self.geolocator.geocode(address)
+            if location:
+                return (location.latitude, location.longitude)
+            return None
+        except Exception as e:
+            print(f"Error obteniendo coordenadas: {e}")
+            return None
