@@ -13,6 +13,7 @@ class AddressAction:
         address = self.extract_address(self.prompt)
         if address:
             ContactRepo.actualizar_contacto(self.contacto.id, direccion=address)
+            print("La dirección del usuario ha sido registrada en la base de datos.")
             return {"role": "assistant", "content": f"La dirección del usuario ha sido registrada como: {address}."}
         else:
             return {"role": "system", "content": "Por favor, proporciona tu dirección para un mejor servicio."}
