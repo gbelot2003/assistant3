@@ -12,6 +12,7 @@ class AddressAction:
         # Por ejemplo, usando expresiones regulares o un extractor de direcciones
         address = self.extract_address(self.prompt)
         if address:
+            print(f"Etraido: {address}")
             ContactRepo.actualizar_contacto(self.contacto.id, direccion=address)
             return {"role": "assistant", "content": f"La dirección del usuario ha sido registrada como: {address}."}
         else:

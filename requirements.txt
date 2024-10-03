@@ -1,7 +1,9 @@
+fitz
 Flask
-Flask-SocketIO
-Flask-SQLAlchemy
-PyMuPDF
-SQLAlchemy
-chromadb
-Flask-Migrate
+Flask_Migrate
+flask_sqlalchemy
+openai
+python-dotenv
+Requests
+pipreqs
+spacy

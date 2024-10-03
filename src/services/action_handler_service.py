@@ -1,7 +1,7 @@
 
 # src/services/action_handler_service.py
 
-
+import spacy
 from src.actions.address_action import AddressAction
 from src.actions.email_action import EmailAction
 from src.actions.conversation_history_action import ConversationHistoryAction
@@ -14,6 +14,15 @@ class ActionHandleService:
         self.user_id = user_id
         self.prompt = prompt
         self.messages = []
+
+    def detectar_intento_envio(self, mensaje):
+        nlp = spacy.load("es_core_news_sm")
+        doc = nlp(mensaje)
+        for token in doc:
+            if token.lemma_ in ["enviar", "caja", "paquete", "envío"]:
+                return True
+        return False
+
 
     def handle_actions(self):
         # Verificar si el usuario tiene un número de teléfono en la base de datos
@@ -48,5 +57,13 @@ class ActionHandleService:
         if email_message:
             self.messages.append(email_message)
 
+        # Detectar intento de envío de caja
+        if self.detectar_intento_envio(self.prompt):
+            print("Intento de crear envío de caja detectado.")
+        else:
+            print("No se detectó intento de envío.")
+
 
         return self.messages
+
+
