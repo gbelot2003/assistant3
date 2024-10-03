@@ -85,21 +85,30 @@ class ActionHandleService:
 
         # Verificar si se tiene toda la información necesaria para agendar la entrega
         if all(self.context.values()):
-            # Obtener las coordenadas de la dirección del cliente
-            customer_coords = self.get_coordinates_from_address(self.context["address"])
-            if not customer_coords:
-                self.messages.append({"role": "system", "content": "No se pudo obtener las coordenadas de la dirección."})
-            else:
-                # Agendar la entrega
-                schedule_delivery_action = ScheduleDeliveryAction(
-                    self.user_id,
-                    self.context["package_type"],
-                    self.context["delivery_time"],
-                    self.context["address"]
-                )
-                delivery_message = schedule_delivery_action.schedule_delivery()
-                if delivery_message:
-                    self.messages.append(delivery_message)
+            # Verificar si la información del contacto está completa
+            if not contacto.direccion:
+                self.messages.append({"role": "system", "content": "Por favor, proporciona tu dirección."})
+            if not contacto.email:
+                self.messages.append({"role": "system", "content": "Por favor, proporciona tu email."})
+            if not contacto.telefono:
+                self.messages.append({"role": "system", "content": "Por favor, proporciona tu número de teléfono."})
+
+            if contacto.direccion and contacto.email and contacto.telefono:
+                # Obtener las coordenadas de la dirección del cliente
+                customer_coords = self.get_coordinates_from_address(self.context["address"])
+                if not customer_coords:
+                    self.messages.append({"role": "system", "content": "No se pudo obtener las coordenadas de la dirección."})
+                else:
+                    # Agendar la entrega
+                    schedule_delivery_action = ScheduleDeliveryAction(
+                        self.user_id,
+                        self.context["package_type"],
+                        self.context["delivery_time"],
+                        self.context["address"]
+                    )
+                    delivery_message = schedule_delivery_action.schedule_delivery()
+                    if delivery_message:
+                        self.messages.append(delivery_message)
         else:
             # Verificar si el contacto ya tiene un número de teléfono registrado
             if not contacto.telefono:
