@@ -1,9 +1,11 @@
-from src.actions.address_action import AddressAction
-from src.actions.email_action import EmailAction
 from src.actions.conversation_history_action import ConversationHistoryAction
 from src.actions.verify_contact_action import VerifyContactAction
 from src.repos.chromadb_repo import ChromaDBRepo
 from src.actions.name_action import NameAction
+from src.actions.address_action import AddressAction
+from src.actions.email_action import EmailAction
+from src.actions.schedule_delivery_action import ScheduleDeliveryAction
+from src.services.intent_service import IntentService
 
 class ActionHandleService:
     def __init__(self, user_id, prompt):
@@ -44,5 +46,32 @@ class ActionHandleService:
         if email_message:
             self.messages.append(email_message)
 
+        # Detectar intent
+        intent_service = IntentService(self.prompt)
+        intent = intent_service.detect_intent()
+
+        if intent == "schedule_delivery":
+            # Recopilar información necesaria para agendar la entrega
+            package_type = self.extract_package_type(self.prompt)
+            delivery_time = self.extract_delivery_time(self.prompt)
+
+            if package_type and delivery_time:
+                # Agendar la entrega
+                schedule_delivery_action = ScheduleDeliveryAction(self.user_id, package_type, delivery_time, contacto.direccion)
+                delivery_message = schedule_delivery_action.schedule_delivery()
+                if delivery_message:
+                    self.messages.append(delivery_message)
+            else:
+                self.messages.append({"role": "system", "content": "Por favor, proporciona el tipo de caja y la hora de entrega."})
 
         return self.messages
+
+    def extract_package_type(self, prompt):
+        # Implementa aquí la lógica para extraer el tipo de caja del prompt
+        # Por simplicidad, asumimos que el tipo de caja está en el texto
+        return "tipo_de_caja" if "tipo_de_caja" in prompt else None
+
+    def extract_delivery_time(self, prompt):
+        # Implementa aquí la lógica para extraer la hora de entrega del prompt
+        # Por simplicidad, asumimos que la hora de entrega está en el texto
+        return "2023-10-01 18:00:00" if "hora de entrega" in prompt else None
