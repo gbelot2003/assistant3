@@ -1,6 +1,3 @@
-
-# src/services/action_handler_service.py
-
 import spacy
 from src.actions.address_action import AddressAction
 from src.actions.email_action import EmailAction
@@ -22,7 +19,6 @@ class ActionHandleService:
             if token.lemma_ in ["enviar", "caja", "paquete", "envío"]:
                 return True
         return False
-
 
     def handle_actions(self):
         # Verificar si el usuario tiene un número de teléfono en la base de datos
@@ -60,10 +56,41 @@ class ActionHandleService:
         # Detectar intento de envío de caja
         if self.detectar_intento_envio(self.prompt):
             print("Intento de crear envío de caja detectado.")
+            
+            # Verificar y actualizar la información del contacto
+            self.verificar_y_actualizar_contacto(contacto)
+
         else:
             print("No se detectó intento de envío.")
 
-
         return self.messages
 
+    def verificar_y_actualizar_contacto(self, contacto):
+        # Verificar si el contacto tiene nombre, dirección y email
+        tiene_nombre = contacto.nombre is not None
+        tiene_direccion = contacto.direccion is not None
+        tiene_email = contacto.email is not None
+        message = []
 
+        if tiene_nombre and tiene_direccion and tiene_email:
+            # Si tiene toda la información, solo mostrarla
+            print("Información del contacto:")
+            print(f"Nombre: {contacto.nombre}")
+            print(f"Dirección: {contacto.direccion}")
+            print(f"Email: {contacto.email}")
+        else:
+            # Si falta alguna información, solicitarla y actualizar el contacto
+            if not tiene_nombre:
+                message =  {"role": "assistant", "content": "Por favor, ingresa su nombre de contacto"}
+                
+            if not tiene_direccion:
+                message =  {"role": "assistant", "content": "Por favor, ingresa su dirección"}
+
+            if not tiene_email:
+                message =  {"role": "assistant", "content": "Por favor, ingresa su correo electrónico"}
+
+
+            return message
+            # Actualizar el contacto en la base de datos
+            #VerifyContactAction().actualizar_contacto(contacto.id, contacto.nombre, contacto.telefono, contacto.direccion, contacto.email)
+            #print("Información del contacto actualizada.")

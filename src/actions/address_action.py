@@ -1,6 +1,10 @@
 # src/actions/address_action.py
 
+import spacy
 from src.repos.contact_repo import ContactRepo
+
+# Cargar el modelo de SpaCy para español
+nlp = spacy.load("es_core_news_sm")
 
 class AddressAction:
     def __init__(self, contacto, prompt):
@@ -9,17 +13,23 @@ class AddressAction:
 
     def process_address(self):
         # Aquí puedes implementar la lógica para extraer la dirección del prompt
-        # Por ejemplo, usando expresiones regulares o un extractor de direcciones
         address = self.extract_address(self.prompt)
         if address:
-            print(f"Etraido: {address}")
+            print(f"Extraído: {address}")
             ContactRepo.actualizar_contacto(self.contacto.id, direccion=address)
             return {"role": "assistant", "content": f"La dirección del usuario ha sido registrada como: {address}."}
         else:
             return {"role": "system", "content": "Por favor, proporciona tu dirección para un mejor servicio."}
 
     def extract_address(self, text):
-        # Implementa aquí la lógica para extraer la dirección del texto
-        # Esto puede ser una expresión regular o un servicio externo
-        # Por simplicidad, aquí se asume que la dirección está en el texto
-        return text.split("dirección:")[-1].strip() if "dirección:" in text else None
+        # Procesar el texto con SpaCy
+        doc = nlp(text)
+        
+        # Buscar entidades de tipo "LOC" (localización) que podrían ser direcciones
+        addresses = [ent.text for ent in doc.ents if ent.label_ == "LOC"]
+        
+        # Si se encuentra alguna dirección, devolver la primera encontrada
+        if addresses:
+            return addresses[0]
+        else:
+            return None
