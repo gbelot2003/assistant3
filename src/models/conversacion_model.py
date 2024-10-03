@@ -1,3 +1,4 @@
+# src/models/conversacion_model.py
 from extensions import db
 
 class Conversation(db.Model):

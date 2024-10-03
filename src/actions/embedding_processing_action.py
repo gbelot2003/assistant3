@@ -1,3 +1,5 @@
+# src/actions/embedding_processing_action.py
+
 from openai import OpenAI
 from dotenv import load_dotenv
 import os

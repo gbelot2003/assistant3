@@ -1,3 +1,5 @@
+# src/actions/email_action.py
+
 from src.repos.contact_repo import ContactRepo
 
 class EmailAction:
